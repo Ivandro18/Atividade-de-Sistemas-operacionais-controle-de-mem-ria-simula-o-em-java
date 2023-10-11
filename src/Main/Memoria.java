@@ -1,80 +1,67 @@
 package Main;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
-public class Memoria {
-	private int espacoOcupado = 0;
-	private int processosNaoAlocados;
-	private int enderecoDeBusca;
-	private LinkedList<Processo> mapaDeAlocacao ;
+import javax.swing.table.AbstractTableModel;
+
+public abstract class Memoria {
+	protected int espacoOcupado;
+	protected int qtdProcessosNaoAlocados;
+	protected int qtdProcessosCriados;
+	protected int qtdProcessosRemovidos;
+	protected int qtdProcessosAlocados;
+	protected int enderecoDeBusca;
+	protected LinkedList<Processo> mapaDeAlocacao ;
+	protected static final int TAMANHO_DA_MEMORIA = 1000;
+	protected int indice;
+	protected boolean alocou = false;
+	
 	
 	public Memoria() {
 		this.espacoOcupado = 0;
-		this.processosNaoAlocados = 0;
+		this.qtdProcessosNaoAlocados = 0;
 		this.mapaDeAlocacao = new LinkedList<>();
+		this.qtdProcessosCriados = 0;
+		this.qtdProcessosRemovidos = 0;
+		this.enderecoDeBusca = 0;
 	}
+	
 
 	public void geradorDeProcesso () {
 		Processo processo = new Processo();
-		enderecoDeBusca = 0;
+		qtdProcessosCriados++;
 		alocaNaMemoria(processo);
 	}
 	
+	protected abstract void alocaNaMemoria(Processo processo) ;
 	
-	public void alocaNaMemoria(Processo processo) {
-		boolean alocou = false;
-		if (mapaDeAlocacao.size() == 0) {
-			processo.setEndereco(0);
-			mapaDeAlocacao.add(processo);
-			alocou = true;
-		}
-		else if (mapaDeAlocacao.get(0).getEndereco() > processo.getTamanho()) {
-			processo.setEndereco(0);
-			mapaDeAlocacao.addFirst(processo);
-			alocou = true;
-		}
-		else if (mapaDeAlocacao.size() == 1) {
-			if (mapaDeAlocacao.get(0).getEndereco() < processo.getTamanho()) {
-				processo.setEndereco(mapaDeAlocacao.get(0).getEndereco()+ mapaDeAlocacao.get(0).getTamanho());
-				mapaDeAlocacao.add(processo);
-				alocou = true;
-				}
-			else {
-				processo.setEndereco(0);
-				mapaDeAlocacao.addFirst(processo);
-				alocou = true;
-			}
-			}else {
-			for (int i = 0; i < mapaDeAlocacao.size(); i++) {
-				if (calculaEspacoLivre(i) >= processo.getTamanho()) {
-					processo.setEndereco(mapaDeAlocacao.get(i).getEndereco() + mapaDeAlocacao.get(i).getTamanho());
-					mapaDeAlocacao.add(i + 1, processo);
-					alocou = true;
-					break;
-				}
-			}
-		}
-		if (alocou)espacoOcupado += processo.getTamanho();
-		else processosNaoAlocados ++;
+	protected void addComeco(Processo processo) {
+		processo.setEndereco(0);
+		mapaDeAlocacao.addFirst(processo);
+		alocou = true;
 	}
-	
-	private int calculaEspacoLivre(int endereco) {
-		int tamanhoLivre = 1000;
+
+	protected int calculaEspacoLivre(int endereco) {
+		int tamanhoLivre = TAMANHO_DA_MEMORIA;
 		if ((endereco + 1) < mapaDeAlocacao.size() ) {
 			tamanhoLivre = mapaDeAlocacao.get(endereco + 1).getEndereco();
 		}
 		tamanhoLivre -= mapaDeAlocacao.get(endereco).getEndereco();  
 		tamanhoLivre -= mapaDeAlocacao.get(endereco).getTamanho();
-		return tamanhoLivre;		
-	}
+	return tamanhoLivre;		
+}
 	
 	public void imprimeMapaDeAlocacao (){
 		for (Processo p : mapaDeAlocacao) {
 			p.imprimeProcesso();
 		}
-		System.out.println("Espaço ocupado: " + espacoOcupado);
-		System.out.println("Quantidade de processos não alocados por falta de espaço: " + processosNaoAlocados);
+		System.out.println("\nEspaço ocupado: " + espacoOcupado);
+		System.out.println("Quantidade de processos alocados: " + qtdProcessosAlocados);
+		System.out.println("Quantidade de processos criados: " + qtdProcessosCriados);
+		System.out.println("Quantidade de processos removidos: " + qtdProcessosRemovidos);
+		System.out.println("Quantidade de processos não alocados por falta de espaço: " + qtdProcessosNaoAlocados);
 		
 	}
 	
@@ -86,9 +73,13 @@ public class Memoria {
 			//mapaDeAlocacao.get(d).imprimeProcesso();
 			espacoOcupado -= mapaDeAlocacao.get(d).getTamanho();
 			mapaDeAlocacao.remove(d);
+			qtdProcessosRemovidos ++;
+			qtdProcessosAlocados--;
 			
 		}
 	}
 	
+
+
 }
 	

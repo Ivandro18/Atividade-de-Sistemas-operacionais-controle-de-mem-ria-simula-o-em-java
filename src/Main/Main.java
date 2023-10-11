@@ -19,7 +19,7 @@ public class Main {
 //		
 //		System.out.println(t.get(0));
 		
-		Memoria memoria = new Memoria();
+		Memoria memoria = new FirstFit();
 		
 		for (int i = 0; i < 50; i++) {
 			

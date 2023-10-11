@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class Processo {
 	private int id;
-	private static int contaId = 0;
+	private static int contaId = 1;
 	private int endereco;
 	private int tamanho;
 	
